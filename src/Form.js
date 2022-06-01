@@ -1,120 +1,127 @@
-import {useFormik, validateYupSchema} from "formik";
+import {Formik, Form, Field, ErrorMessage, useField} from "formik";
 import * as Yup from 'yup';
 
-// const validate = values => {
-//         const errors = {};
-//         if (!values.name) {
-//                 errors.name = "Name is required"
-//         } else if (values.name.length < 2) {
-//                 errors.name = 'Name is too short, min 2 symbols'
-//         }
-//         if (!values.email) {
-//                 errors.email = 'Email is require'
-//         } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-//                 errors.email = 'Invalid email address';
-//         }
-//         return errors;
-// }
+const MyTextInput = ({label, ...props}) => {
+    const [field, meta] = useField(props);
+        return (
+            <>
+                    <label htmlFor={props.name}>{label}</label>
+                    <input {...props} {...field}/>
+                    {meta.touched && meta.error ? (
+                        <div className="error">{meta.error}</div>
+                    ) : null}
+            </>
+            )
+};
 
-const Form = () => {
+const MyCheckBox = ({children, ...props}) => {
+        const [field, meta] = useField({...props, type: "checkbox"});
+        return (
+            <>
+                    <label className="checkbox">
+                            <input type="checkbox" {...props} {...field}/>
+                            {children}
+                    </label>
+                    {meta.touched && meta.error ? (
+                        <div className="error">{meta.error}</div>
+                    ) : null}
+            </>
+        )
+};
 
-        const formik = useFormik({
-                initialValues: {
-                        name: '',
-                        email: '',
-                        amount: 0,
-                        currency: '',
-                        text: '',
-                        terms: false
-                },
-                validationSchema: Yup.object({
-                        name: Yup.string()
-                            .min(2, 'Name is too short, min 2 symbols')
-                            .required('Name is required'),
-                        email: Yup.string()
-                            .email('Invalid email address')
-                            .required('Email is required'),
-                        amount: Yup.number()
-                            .min(5, 'Not less than 5')
-                            .required('Required field'),
-                        currency: Yup.string().required('Choose currency'),
-                        text: Yup.string().min(10, 'Min 10 symbols'),
-                        terms: Yup.boolean()
-                            .required('Do you agree with terms?')
-                            .oneOf([true], 'Do you agree with terms?')
-                }),
-                onSubmit: values => console.log(JSON.stringify(values, null, 2))
-        })
+const CustomForm = () => {
 
     return (
-        <form className="form" onSubmit={formik.handleSubmit}>
-            <h2>Отправить пожертвование</h2>
-            <label htmlFor="name">Ваше имя</label>
-            <input
-                id="name"
-                name="name"
-                type="text"
-                value={formik.values.name}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-            />
-                {formik.errors.name && formik.touched.name ? <div className='error'>{formik.errors.name}</div> : null}
-            <label htmlFor="email">Ваша почта</label>
-            <input
-                id="email"
-                name="email"
-                type="email"
-                value={formik.values.email}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-            />
-                {formik.errors.email && formik.touched.email ? <div className='error'>{formik.errors.email}</div> : null}
+        <Formik
+            initialValues={{
+                    name: '',
+                    email: '',
+                    amount: 0,
+                    currency: '',
+                    text: '',
+                    terms: false
+            }}
+            validationSchema= {Yup.object({
+                name: Yup.string()
+                    .min(2, 'Name is too short, min 2 symbols')
+                    .required('Name is required'),
+                    email: Yup.string()
+                    .email('Invalid email address')
+                    .required('Email is required'),
+                    amount: Yup.number()
+                    .min(5, 'Not less than 5')
+                    .required('Required field'),
+                    currency: Yup.string().required('Choose currency'),
+                    text: Yup.string().min(10, 'Min 10 symbols'),
+                    terms: Yup.boolean()
+                    .required('Do you agree with terms?')
+                    .oneOf([true], 'Do you agree with terms?')
+                 })}
+            onSubmit = {values => console.log(JSON.stringify(values, null, 2))}
+        >
+                <Form className="form">
+                        <h2>Отправить пожертвование</h2>
+                        <MyTextInput
+                                label="Ваше имя"
+                                id="name"
+                                name="name"
+                                type="text"
+                        />
+                        {/*can be replaced by component MyTextInput*/}
+                        <label htmlFor="email">Ваша почта</label>
+                        <Field
+                            id="email"
+                            name="email"
+                            type="email"
+                        />
+                        <ErrorMessage className='error' name='email' component='div' />
 
-                <label htmlFor="amount">Количество</label>
-            <input
-                id="amount"
-                name="amount"
-                type="number"
-                value={formik.values.amount}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-            />
-                {formik.errors.amount && formik.touched.amount ? <div className='error'>{formik.errors.amount}</div> : null}
-                <label htmlFor="currency">Валюта</label>
-            <select
-                id="currency"
-                name="currency"
-                value={formik.values.currency}
-                onChange={formik.handleChange}>
-                    <option value="">Выберите валюту</option>
-                    <option value="USD">USD</option>
-                    <option value="UAH">UAH</option>
-                    <option value="RUB">RUB</option>
-            </select>
-                {formik.errors.currency && formik.touched.currency ? <div className='error'>{formik.errors.currency}</div> : null}
+                        {/*can be replaced by component MyTextInput*/}
+                        <label htmlFor="amount">Количество</label>
+                        <Field
+                            id="amount"
+                            name="amount"
+                            type="number"
 
-                <label htmlFor="text">Ваше сообщение</label>
-            <textarea 
-                id="text"
-                name="text"
-                value={formik.values.text}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-            />
-                {formik.errors.text && formik.touched.text ? <div className='error'>{formik.errors.text}</div> : null}
+                        />
+                        <ErrorMessage className='error' name='amount' component='div' />
+                        <label htmlFor="currency">Валюта</label>
+                        <Field
+                            id="currency"
+                            name="currency"
+                            as='select'>
+                                <option value="">Выберите валюту</option>
+                                <option value="USD">USD</option>
+                                <option value="UAH">UAH</option>
+                                <option value="RUB">RUB</option>
+                        </Field>
+                        <ErrorMessage className='error' name='currency' component='div' />
 
-                <label className="checkbox">
+                        <label htmlFor="text">Ваше сообщение</label>
+                        <Field
+                            id="text"
+                            name="text"
+                            as='textarea'
+                        />
+                        <ErrorMessage className='error' name='text' component='div' />
 
-                    <input
-                    name="terms"
-                    type="checkbox"
-                    value={formik.values.terms}
-                    onChange={formik.handleChange}/>
-                Соглашаетесь с политикой конфиденциальности?
-            </label>
-            <button type="submit">Отправить</button>
-        </form>
+                        <MyCheckBox name="terms">
+                                Соглашаетесь с политикой конфиденциальности?
+                        </MyCheckBox>
+
+                        {/*<label className="checkbox">*/}
+
+                        {/*        <Field*/}
+                        {/*            name="terms"*/}
+                        {/*            type="checkbox" />*/}
+                        {/*        Соглашаетесь с политикой конфиденциальности?*/}
+                        {/*</label>*/}
+                        {/*<ErrorMessage className='error' name='terms' component='div' />*/}
+
+                        <button type="submit">Отправить</button>
+                </Form>
+        </Formik>
     )
 }
 
-export default Form;
+export default CustomForm;
